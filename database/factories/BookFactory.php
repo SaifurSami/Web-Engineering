@@ -18,10 +18,10 @@ class BookFactory extends Factory
     {
         return [
             'title'=>fake()->sentence,
-            'authro'=> fake()->name,
+            'author'=> fake()->name,
             'isbn'=>fake()->isbn13,
             'stock'=> fake()->numberBetween(0,500),
-            'price'=>fake()->randomFloat(2,10,1000),
+            'price'=>fake()->randomFloat(2,10,100),
         ];
     }
 }

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
+use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Http\Request;
+use PharIo\Manifest\Author;
 
 class BookController extends Controller
 {
@@ -14,8 +16,16 @@ class BookController extends Controller
     {
         //
         // return "Hello Motherchod";
-        $books = Book::all();
+        // $books = Book::where('price', '>', 90)->get();
+        // $books = Book::whereBetween('price', [30, 50])
+        // ->where('stock','>',3)
+        // // ->where('author','!=','John')
+        // // ->orderBy('title')
+        // ->orderBy('id')
+        // ->get();
+        $books = Book::paginate(10);
         return view("books.index")->with("books", $books);
+        // return view("books.index", compact('books'));
     }
 
     /**
@@ -23,7 +33,8 @@ class BookController extends Controller
      */
     public function create()
     {
-        //
+        // return "HI";
+        return view("books.create");
     }
 
     /**
@@ -31,15 +42,44 @@ class BookController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // dd($request->all());
+        $rules = [
+            "title" => "required",
+            "author" => "required",
+            'price' => "required|numeric",
+            'isbn'=>"required|size:13",
+            'stock' =>"required|numeric|integer|gte:0",
+        ];
+
+        $message = [
+            'stock-gte' => 'The stock must be greater than or equal o',
+        ];
+        $request->validate($rules,$message);
+//one way to do
+        // $book = new Book();
+        // $book->title = $request->title;
+        // $book->author = $request->author;
+        // $book->price = $request->price;
+        // $book->isbn = $request->isbn;
+        // $book->stock = $request->stock;
+        // $book->save();
+
+        //another way to do
+        $book = Book::create($request->all());
+
+        // return redirect()->route("books.index");
+        return redirect()->route("books.show",$book->id);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Book $book)
+    public function show($id)
     {
-        //
+        // return "Showing Book with ID = ".$id;
+        $book = Book::find($id);
+        // return view('books.index')->with('books', $book);
+        return view('books.show')->with('book',$book);
     }
 
     /**
@@ -61,8 +101,11 @@ class BookController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Book $book)
+    public function destroy(Request $request,$id)
     {
-        //
+        $book = Book::find($id);
+        $book->delete();
+
+        return redirect()->route('books.index');
     }
 }
